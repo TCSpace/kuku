@@ -1,0 +1,17 @@
+{
+    "extends": "../shared/typescript.json",
+    "include": ["./src"],
+    "compilerOptions": {
+        "rootDirs": ["src"],
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "target": "ES2022",
+        "lib": ["ES2022"],
+        "types": ["node"],
+        "outDir": "dist",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/**/*"]
+        }
+    }
+}
