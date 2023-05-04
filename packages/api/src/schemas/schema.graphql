@@ -1,0 +1,108 @@
+enum UserRole {
+    QA
+    ANALYST
+    MANAGER
+}
+
+directive @role(roles: [UserRole!]) on FIELD_DEFINITION
+
+type User {
+    username: String!
+    role: UserRole!
+}
+
+type Testplan {
+    id: String!
+
+    testcases: [Testcase!]
+}
+
+enum TestcaseStatus {
+    IN_PROGRESS
+    FAILURE
+    SUCCESS
+}
+
+type TestcaseStatusField {
+    value: TestcaseStatus!
+}
+
+type Testcase {
+    id: Int!
+    precondition: String
+    postcondition: String
+    comment: String
+    deadline: String
+
+    testplan: Testplan
+    status: TestcaseStatusField
+    assignee: User
+    steps: [Step!]
+}
+
+enum StepStatus {
+    IN_PROGRESS
+    FAILURE
+    SUCCESS
+}
+
+type Step {
+    id: Int!
+    condition: String
+    comment: String
+    status: StepStatus
+}
+
+type Query {
+    getMe: User! @role(roles: [QA, ANALYST, MANAGER])
+    getAssignedTestcases: [Testcase!] @role(roles: [QA])
+    getTestcaseById(id: Int!): Testcase @role(roles: [QA, ANALYST, MANAGER])
+    getTestplans: [Testplan!] @role(roles: [ANALYST, MANAGER])
+    getTestplanById(id: String!): Testplan @role(roles: [ANALYST, MANAGER])
+    getStepById(id: Int!): Step @role(roles: [QA, ANALYST, MANAGER])
+}
+
+input CreateTestcaseInput {
+    testplanId: String!
+    precondition: String
+    postcondition: String
+    comment: String
+    deadline: String
+    assignee: String
+}
+
+input UpdateTestcaseInput {
+    testcaseId: Int!
+    precondition: String
+    postcondition: String
+    comment: String
+    deadline: String
+    assignee: String
+}
+
+input CreateStepInput {
+    testcaseId: Int!
+    condition: String
+    comment: String
+}
+
+input UpdateStepForQAInput {
+    stepId: Int!
+    comment: String
+    status: StepStatus
+}
+
+input UpdateTestcaseForQAInput {
+    testcaseId: Int!
+    comment: String
+}
+
+type Mutation {
+    createTestplan(id: String!): Testplan! @role(roles: [ANALYST, MANAGER])
+    createTestcase(input: CreateTestcaseInput!): Testcase! @role(roles: [ANALYST, MANAGER])
+    updateTestcase(input: UpdateTestcaseInput!): Testcase! @role(roles: [ANALYST, MANAGER])
+    updateTestcaseForQA(input: UpdateTestcaseForQAInput!): Testcase! @role(roles: [QA])
+    createStep(input: CreateStepInput!): Step! @role(roles: [ANALYST, MANAGER])
+    updateStepForQA(input: UpdateStepForQAInput!): Step! @role(roles: [QA])
+    signIn(username: String!): String
+}

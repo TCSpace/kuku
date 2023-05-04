@@ -1,16 +1,26 @@
 {
     "name": "@kuku/api",
-    "type": "module",
     "version": "1.0.0",
     "scripts": {
-        "dev": "nodemon --watch \"src/**\" --ext \"ts,json\" --exec \"ts-node --esm src/index.ts\"",
-        "start": "ts-node --esm src/index.ts"
+        "start": "ts-node src/index.ts",
+        "dev": "nodemon src/index.ts",
+        "seed": "ts-node prisma/seed.ts",
+        "generate:gql": "graphql-codegen"
     },
     "dependencies": {
-        "@apollo/server": "^4.7.0",
-        "graphql": "^16.6.0"
+        "@apollo/server": "^4.7.1",
+        "@graphql-tools/schema": "^9.0.19",
+        "@graphql-tools/utils": "^9.2.1",
+        "@prisma/client": "^4.13.0",
+        "graphql": "^16.6.0",
+        "jsonwebtoken": "^9.0.0",
+        "prisma": "^4.13.0"
     },
     "devDependencies": {
+        "@graphql-codegen/cli": "^3.3.1",
+        "@graphql-codegen/typescript": "^3.0.4",
+        "@graphql-codegen/typescript-resolvers": "^3.2.1",
+        "@types/jsonwebtoken": "^9.0.2",
         "@types/node": "^18.16.3",
         "nodemon": "^2.0.22",
         "ts-node": "^10.9.1",

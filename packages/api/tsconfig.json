@@ -1,9 +1,9 @@
 {
     "extends": "../shared/typescript.json",
-    "include": ["./src"],
+    "include": ["./src", "./prisma"],
     "compilerOptions": {
         "rootDirs": ["src"],
-        "module": "ESNext",
+        "module": "CommonJS",
         "moduleResolution": "node",
         "target": "ES2022",
         "lib": ["ES2022"],

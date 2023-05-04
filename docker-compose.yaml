@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+    database:
+        image: postgres:alpine
+        environment:
+            - POSTGRES_USER=admin
+            - POSTGRES_PASSWORD=gotahellstupidhackers
+            - POSTGRES_DB=kuku
+        ports:
+            - '5432:5432'

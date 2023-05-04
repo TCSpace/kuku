@@ -1,8 +1,10 @@
 import { createApp, h, provide } from 'vue';
 import { DefaultApolloClient } from '@vue/apollo-composable';
+import { createPinia } from 'pinia';
 
-import { apolloClient } from './api/graphql';
-import App from './App.vue';
+import { apolloClient } from '@/api/graphql';
+import { router } from '@/router';
+import App from '@/app.vue';
 
 import './style.css';
 
@@ -11,4 +13,7 @@ createApp({
         provide(DefaultApolloClient, apolloClient);
     },
     render: () => h(App),
-}).mount('#app');
+})
+    .use(router)
+    .use(createPinia())
+    .mount('#app');

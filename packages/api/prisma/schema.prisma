@@ -1,0 +1,65 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+    QA
+    ANALYST
+    MANAGER
+}
+
+model User {
+    username String   @id
+    role     UserRole
+
+    testcases Testcase[]
+}
+
+model Testplan {
+    id String @id
+
+    testcases Testcase[]
+}
+
+enum TestcaseStatus {
+    IN_PROGRESS
+    FAILURE
+    SUCCESS
+
+    @@map("TestcaseResult")
+}
+
+model Testcase {
+    id            Int       @id @default(autoincrement())
+    precondition  String?   @default("")
+    postcondition String?   @default("")
+    comment       String?   @default("")
+    deadline      DateTime?
+
+    steps            Step[]
+    testplan         Testplan @relation(fields: [testplanId], references: [id])
+    testplanId       String
+    assignee         User?    @relation(fields: [assigneeUsername], references: [username])
+    assigneeUsername String?
+}
+
+enum StepStatus {
+    IN_PROGRESS
+    FAILURE
+    SUCCESS
+}
+
+model Step {
+    id        Int        @id @default(autoincrement())
+    condition String?    @default("")
+    comment   String?    @default("")
+    status    StepStatus @default(IN_PROGRESS)
+
+    testcase   Testcase @relation(fields: [testcaseId], references: [id])
+    testcaseId Int
+}
