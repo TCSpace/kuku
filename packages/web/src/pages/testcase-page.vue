@@ -2,7 +2,9 @@
     <n-card v-if="testcase">
         <div class="flex flex-col gap-4">
             <div class="flex flex-row items-center gap-2">
-                <h1 class="text-xl">Тесткейс {{ testcase.testplan?.id }} #{{ testcase.id }}</h1>
+                <h1 class="text-xl">
+                    Тесткейс {{ testcase.testplan?.id }} #{{ testcase.id }}
+                </h1>
                 <n-icon
                     v-if="testcase.status?.value"
                     :size="32"
@@ -11,7 +13,9 @@
             </div>
             <div class="flex flex-row items-center gap-4 text-lg">
                 <span>Назначен: {{ testcase.assignee?.username }}</span>
-                <n-avatar round size="small">{{ testcase.assignee?.username }}</n-avatar>
+                <n-avatar round size="small">
+                    {{ testcase.assignee?.username }}
+                </n-avatar>
                 <n-date-picker
                     v-if="auth.role !== UserRole.Qa"
                     type="datetime"
@@ -22,11 +26,18 @@
                 <template #header>
                     <div class="flex flex-row items-center gap-2">
                         <span>Пре-условие</span>
-                        <div class="cursor-pointer" @click="togglePreconditionEdit">
+                        <div
+                            class="cursor-pointer"
+                            @click="togglePreconditionEdit"
+                        >
                             <n-icon
                                 v-if="auth.role !== UserRole.Qa"
                                 size="16"
-                                :component="precondition === null ? Edit20Regular : Save20Regular"
+                                :component="
+                                    precondition === null
+                                        ? Edit20Regular
+                                        : Save20Regular
+                                "
                             />
                         </div>
                     </div>
@@ -39,14 +50,30 @@
                 </template>
             </n-alert>
             <n-timeline>
-                <template v-for="step in testcase.steps">
+                <template v-for="(step, idx) in steps">
                     <n-timeline-item
                         v-if="step.status"
                         :type="matchTimelineStatus(step.status)"
-                        :title="`Шаг #${step.id}`"
+                        :title="`Шаг #${idx + 1}`"
                         :time="step.comment ?? ''"
                         :content="step.condition ?? ''"
-                    />
+                    >
+                        <template #icon>
+                            <n-dropdown
+                                trigger="click"
+                                :options="statusDropdownOptions"
+                                @select="
+                                    (status) =>
+                                        changeStepStatus(step.id, status)
+                                "
+                            >
+                                <n-icon
+                                    :size="20"
+                                    :component="matchStatusIcon(step.status)"
+                                />
+                            </n-dropdown>
+                        </template>
+                    </n-timeline-item>
                 </template>
             </n-timeline>
             <n-alert type="info">
@@ -88,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { watchEffect, computed, ref } from 'vue';
+import { watchEffect, computed, ref, h, Component } from 'vue';
 import { useRoute } from 'vue-router';
 import { useMutation, useQuery } from '@vue/apollo-composable';
 import {
@@ -102,13 +129,15 @@ import {
     NDatePicker,
     NButton,
     NInput,
+    NDropdown,
+    DropdownOption,
 } from 'naive-ui';
 import { Edit20Regular, Save20Regular } from '@vicons/fluent';
 
 import { graphql } from '@/gql';
 import { matchTimelineStatus } from '@/utils/match-timeline-status';
 import { matchStatusIcon } from '@/utils/match-status-icon';
-import { UserRole } from '@/gql/graphql';
+import { StepStatus, UserRole } from '@/gql/graphql';
 import { useAuthStore } from '@/stores/auth';
 
 const getTestcaseQuery = graphql(/* GraphQL */ `
@@ -155,6 +184,40 @@ const editTestcaseForQAMutate = graphql(/* GraphQL */ `
     }
 `);
 
+const editStepForQAMutate = graphql(/* GraphQL */ `
+    mutation addCommentForStep($input: UpdateStepForQAInput!) {
+        updateStepForQA(input: $input) {
+            id
+        }
+    }
+`);
+
+const renderIcon = (icon: Component) => {
+    return () => {
+        return h(NIcon, null, {
+            default: () => h(icon),
+        });
+    };
+};
+
+const statusDropdownOptions: DropdownOption[] = [
+    {
+        key: StepStatus.InProgress,
+        icon: renderIcon(matchStatusIcon(StepStatus.InProgress)),
+        label: 'В прогрессе',
+    },
+    {
+        key: StepStatus.Success,
+        icon: renderIcon(matchStatusIcon(StepStatus.Success)),
+        label: 'Успешно',
+    },
+    {
+        key: StepStatus.Failure,
+        icon: renderIcon(matchStatusIcon(StepStatus.Failure)),
+        label: 'Провалено',
+    },
+];
+
 const auth = useAuthStore();
 const route = useRoute();
 const loadingBar = useLoadingBar();
@@ -171,8 +234,10 @@ query.onResult((result) => {
     }
 });
 
-const { mutate: mutateForQa } = useMutation(editTestcaseForQAMutate);
-const { mutate } = useMutation(editTestcaseMutate);
+const { mutate: mutateTestcaseForQA } = useMutation(editTestcaseForQAMutate);
+const { mutate: mutateTestcase } = useMutation(editTestcaseMutate);
+
+const { mutate: mutateStepForQA } = useMutation(editStepForQAMutate);
 
 watchEffect(() => {
     if (query.loading.value) {
@@ -184,20 +249,35 @@ watchEffect(() => {
 
 const testcase = computed(() => query.result.value?.getTestcaseById);
 
+const steps = computed(() => {
+    const copy = [...(testcase.value?.steps ?? [])];
+    return copy.sort((a, b) => a.id - b.id);
+});
+
 const togglePreconditionEdit = async () => {
     if (precondition.value === null) {
         precondition.value = testcase.value?.precondition ?? '';
     } else {
         loadingBar.start();
-        await mutate({
+        await mutateTestcase({
             input: {
                 testcaseId: Number(testcaseId),
                 precondition: precondition.value,
             },
         });
-        query.refetch();
+        await query.refetch();
         loadingBar.finish();
         precondition.value = null;
+    }
+};
+
+const changeStepStatus = async (stepId: number, status: StepStatus) => {
+    console.log(stepId, status);
+    if (auth.role === UserRole.Qa) {
+        loadingBar.start();
+        await mutateStepForQA({ input: { stepId, status } });
+        await query.refetch();
+        loadingBar.finish();
     }
 };
 </script>

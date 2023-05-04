@@ -16,6 +16,7 @@ const documents = {
     "\n    query getTestcaseForPage($id: Int!) {\n        getTestcaseById(id: $id) {\n            id\n            testplan {\n                id\n            }\n            status {\n                value\n            }\n            precondition\n            postcondition\n            comment\n            steps {\n                id\n                status\n                condition\n                comment\n            }\n            deadline\n            assignee {\n                username\n                role\n            }\n        }\n    }\n": types.GetTestcaseForPageDocument,
     "\n    mutation editTestcase($input: UpdateTestcaseInput!) {\n        updateTestcase(input: $input) {\n            id\n        }\n    }\n": types.EditTestcaseDocument,
     "\n    mutation editTestcaseForQA($input: UpdateTestcaseForQAInput!) {\n        updateTestcaseForQA(input: $input) {\n            id\n        }\n    }\n": types.EditTestcaseForQaDocument,
+    "\n    mutation addCommentForStep($input: UpdateStepForQAInput!) {\n        updateStepForQA(input: $input) {\n            id\n        }\n    }\n": types.AddCommentForStepDocument,
     "\n    query getAssignedTestcasesForList {\n        getAssignedTestcases {\n            id\n            status {\n                value\n            }\n            testplan {\n                id\n            }\n            assignee {\n                username\n            }\n            deadline\n            steps {\n                status\n            }\n        }\n    }\n": types.GetAssignedTestcasesForListDocument,
     "\n    query getTestplansForList {\n        getTestplans {\n            id\n            testcases {\n                id\n                status {\n                    value\n                }\n                testplan {\n                    id\n                }\n                assignee {\n                    username\n                }\n                deadline\n                steps {\n                    status\n                }\n            }\n        }\n    }\n": types.GetTestplansForListDocument,
     "\n    query getMe {\n        getMe {\n            username\n            role\n        }\n    }\n": types.GetMeDocument,
@@ -48,6 +49,10 @@ export function graphql(source: "\n    mutation editTestcase($input: UpdateTestc
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    mutation editTestcaseForQA($input: UpdateTestcaseForQAInput!) {\n        updateTestcaseForQA(input: $input) {\n            id\n        }\n    }\n"): (typeof documents)["\n    mutation editTestcaseForQA($input: UpdateTestcaseForQAInput!) {\n        updateTestcaseForQA(input: $input) {\n            id\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation addCommentForStep($input: UpdateStepForQAInput!) {\n        updateStepForQA(input: $input) {\n            id\n        }\n    }\n"): (typeof documents)["\n    mutation addCommentForStep($input: UpdateStepForQAInput!) {\n        updateStepForQA(input: $input) {\n            id\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
