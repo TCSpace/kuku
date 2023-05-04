@@ -45,6 +45,11 @@ export const useAuthStore = defineStore('auth', () => {
         await fetchUser();
     };
 
+    const signOut = () => {
+        user.value = null;
+        localStorage.removeItem('bearer');
+    };
+
     const token = localStorage.getItem('bearer');
 
     if (token) {
@@ -66,5 +71,13 @@ export const useAuthStore = defineStore('auth', () => {
             .exhaustive()
     );
 
-    return { username, role, displayRole, isAuthenticated, signIn, fetchUser };
+    return {
+        username,
+        role,
+        displayRole,
+        isAuthenticated,
+        signIn,
+        fetchUser,
+        signOut,
+    };
 });
