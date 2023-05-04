@@ -20,11 +20,13 @@ const unwatch = watchEffect(() => {
         if (auth.role !== undefined) {
             if (route.fullPath === '/') {
                 router.push({ path: '/dashboard', force: true });
+                unwatch();
             }
-            unwatch();
         }
     } else {
-        router.push({ path: '/auth', force: true });
+        if (route.fullPath !== '/auth') {
+            router.push({ path: '/auth', force: true });
+        }
     }
 });
 </script>
