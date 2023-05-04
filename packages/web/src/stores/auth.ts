@@ -24,6 +24,14 @@ const signInMutation = graphql(/* GraphQL */ `
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null);
 
+    const fetchUser = async () => {
+        const {
+            data: { getMe },
+        } = await apolloClient.query({ query: getMeQuery });
+
+        user.value = getMe;
+    };
+
     const signIn = async (username: string) => {
         const { data } = await apolloClient.mutate({
             mutation: signInMutation,
@@ -33,14 +41,8 @@ export const useAuthStore = defineStore('auth', () => {
         if (data?.signIn) {
             localStorage.setItem('bearer', data.signIn);
         }
-    };
 
-    const fetchUser = async () => {
-        const {
-            data: { getMe },
-        } = await apolloClient.query({ query: getMeQuery });
-
-        user.value = getMe;
+        await fetchUser();
     };
 
     const token = localStorage.getItem('bearer');
@@ -49,7 +51,9 @@ export const useAuthStore = defineStore('auth', () => {
         fetchUser();
     }
 
-    const isAuthenticated = computed(() => user.value !== null || token !== null);
+    const isAuthenticated = computed(
+        () => user.value !== null || token !== null
+    );
     const username = computed(() => user.value?.username);
     const role = computed(() => user.value?.role);
 

@@ -21,14 +21,21 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { NForm, NCard, NFormItem, NInput, NButton, useLoadingBar } from 'naive-ui';
-import { useQuery } from '@vue/apollo-composable';
+import { useRouter } from 'vue-router';
+import {
+    NForm,
+    NCard,
+    NFormItem,
+    NInput,
+    NButton,
+    useLoadingBar,
+} from 'naive-ui';
 
 import { useAuthStore } from '@/stores/auth';
-import { graphql } from '@/gql';
 
 const auth = useAuthStore();
 const loadingBar = useLoadingBar();
+const router = useRouter();
 
 const username = ref('');
 const isLoading = ref(false);
@@ -39,5 +46,6 @@ const submit = async () => {
     await auth.signIn(username.value);
     loadingBar.finish();
     isLoading.value = false;
+    console.log(await router.push('/dashboard'));
 };
 </script>

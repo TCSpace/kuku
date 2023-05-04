@@ -17,6 +17,13 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/auth',
         component: AuthPage,
+        beforeEnter: () => {
+            const auth = useAuthStore();
+
+            if (auth.isAuthenticated) {
+                return { path: '/dashboard' };
+            }
+        },
     },
     {
         path: '/dashboard',
